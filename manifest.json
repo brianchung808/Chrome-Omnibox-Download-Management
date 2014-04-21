@@ -1,0 +1,19 @@
+{
+  "manifest_version": 2,
+
+  "name": "Download search",
+  "version": "1.0",
+  "omnibox": { "keyword" : "ds" },
+  "icons": {
+    /*"16": "16-full-color.png"*/
+  },
+  "background": {
+    "persistent": false,
+    "scripts": ["background.js"]
+  },
+
+  "permissions": [
+      "downloads",
+      "downloads.open"
+  ]
+}
