@@ -22,11 +22,15 @@ var fmt = {
 	}
 }
 
+/* Parse user input for filename & options
+ * Return: {string filename, string options}
+ */
 function parseOptions(text) {
 	var input, options;
 
 	var text_split = text.split(' ');
 
+	// Case: filename w/ no spaces followed by -options
 	if(text_split.length == 2) {
 		input = text_split[0].trim();
 		options = text_split[1].trim();
@@ -38,19 +42,22 @@ function parseOptions(text) {
 			input = text.trim();
 		}
 
-
-	} else {
-
-		console.log(text.lastIndexOf('-'));
+	// Case: File w/ spaces & (maybe) -options 
+	} else if(text_split.length > 2) {
 
 		// check option case for files w/ spaces in name
 		if(text.lastIndexOf('-') != -1) {
 			input = text.substring(0, text.lastIndexOf('-')).trim();
 			options = text.substring(text.lastIndexOf('-'), text.length).trim();
 
+		// else, no options & spaces-in-filename
 		} else {
 			input = text.trim();
 		}
+
+	// Case: no options, no-spaces-in-filename
+	} else {
+		input = text.trim();
 	}
 
 
@@ -109,10 +116,6 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 /* Listener for input being submitted.
 */
 chrome.omnibox.onInputEntered.addListener(function(text) {
-	// when user enters input, open the file.
-	// TODO -> Add option for delete
-
-
 	var parse = parseOptions(text);
 
 	var input = parse.input;
