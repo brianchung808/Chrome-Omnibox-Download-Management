@@ -1,6 +1,13 @@
 // holds key:value pair of filename:download_id
 var downloads = [];
 
+function match(text) {
+	return "<match>" + text + "</match>";
+}
+
+function dim(text) {
+	return "<dim>" + text + "</dim>";	
+}
 
 /* Listener for input change.
 */
