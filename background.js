@@ -21,15 +21,18 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 	chrome.downloads.search({query: [text]}, function(results) {
 		suggestions = [];
 		for(var i = 0; i < results.length; i++) {
-			var filename = results[i].filename;
+			var downloadItem = results[i];
+			var filename = downloadItem.filename;
+			var fileExists = downloadItem.exists;
 
-			if(filename) {
+			// only if have filename & it exists in file system 
+			// do we consider as suggestion
+			if(filename && fileExists) {
 				filename = filename.split('/').pop();
 
 				suggestions.push({content: filename, description: match(filename)});
+				downloads[filename] = downloadItem.id;
 			}
-
-			downloads[filename] = results[i].id;
 		}
 
 
