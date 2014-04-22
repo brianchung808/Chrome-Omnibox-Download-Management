@@ -22,6 +22,47 @@ var fmt = {
 	}
 }
 
+function parseOptions(text) {
+	var input, options;
+
+	var text_split = text.split(' ');
+
+	if(text_split.length == 2) {
+		input = text_split[0].trim();
+		options = text_split[1].trim();
+
+		// if searching for file w/ spaces, fallback to no-option case
+		if(options.indexOf('-') != 0) {
+			console.log("Searching for filename w/ spaces");
+			options = undefined;
+			input = text.trim();
+		}
+
+
+	} else {
+
+		console.log(text.lastIndexOf('-'));
+
+		// check option case for files w/ spaces in name
+		if(text.lastIndexOf('-') != -1) {
+			input = text.substring(0, text.lastIndexOf('-')).trim();
+			options = text.substring(text.lastIndexOf('-'), text.length).trim();
+
+		} else {
+			input = text.trim();
+		}
+	}
+
+
+	console.log("file: " + input);
+	console.log("options: " + options);
+
+	return {
+		input: input,
+		options: options
+	}
+}
+
 chrome.omnibox.setDefaultSuggestion({description: _default_descr});
 
 /* Listener for input change.
@@ -36,21 +77,10 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 		return;
 	}
 
-	var input;
-	var options;
+	var parse = parseOptions(text);
 
-	var text_split = text.split(' ');
-
-	if(text_split.length == 2) {
-		input = text_split[0].trim();
-		options = text_split[1].trim();
-
-		console.log("file: " + input);
-		console.log("options: " + options);
-
-	} else {
-		input = text;
-	}
+	var input = parse.input;
+	var options = parse.options;
 
 	/* When input changes, search downloads
 	 */
@@ -70,7 +100,6 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 			}
 		}
 
-
 		if(suggestions.length > 0) {
 			suggest(suggestions);
 		}
@@ -83,18 +112,12 @@ chrome.omnibox.onInputEntered.addListener(function(text) {
 	// when user enters input, open the file.
 	// TODO -> Add option for delete
 
-	var text_split = text.split(' ');
 
-	var input;
-	var options;
+	var parse = parseOptions(text);
 
-	if(text_split.length == 2) {
-		input = text_split[0].trim();
-		options = text_split[1].trim();
+	var input = parse.input;
+	var options = parse.options;
 
-	} else {
-		input = text;
-	}
 	// if options specified
 	if(options) {
 
