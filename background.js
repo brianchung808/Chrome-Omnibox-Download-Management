@@ -24,7 +24,9 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 			var filename = results[i].filename;
 
 			if(filename) {
-				suggestions.push({content: filename, description: filename});
+				filename = filename.split('/').pop();
+
+				suggestions.push({content: filename, description: match(filename)});
 			}
 
 			downloads[filename] = results[i].id;
