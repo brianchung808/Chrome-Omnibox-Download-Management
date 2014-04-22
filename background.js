@@ -9,6 +9,9 @@ function dim(text) {
 	return "<dim>" + text + "</dim>";	
 }
 
+
+chrome.omnibox.setDefaultSuggestion({description: "Start typing to search for download..."});
+
 /* Listener for input change.
 */
 chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
