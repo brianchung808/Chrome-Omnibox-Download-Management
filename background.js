@@ -1,6 +1,6 @@
 // holds key:value pair of filename:download_id
 var downloads = [];
-var _default_descr = "Search Downloads for <enter query>"
+var _default_descr = "Search for downloaded items";
 
 // object for formatting description text
 var fmt = {
