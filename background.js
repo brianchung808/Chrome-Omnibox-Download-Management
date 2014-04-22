@@ -1,16 +1,23 @@
 // holds key:value pair of filename:download_id
 var downloads = [];
+var _default_descr = "Search Downloads for <enter query>"
 
-function match(text) {
-	return "<match>" + text + "</match>";
+// object for formatting description text
+var fmt = {
+	match: function (text) {
+		return "<match>" + text + "</match>";
+	}, 
+
+	dim: function (text) {
+		return "<dim>" + text + "</dim>";	
+	}, 
+
+	url: function (text) {
+		return "<url>" + text + "</url>";		
+	}
 }
 
-function dim(text) {
-	return "<dim>" + text + "</dim>";	
-}
-
-
-chrome.omnibox.setDefaultSuggestion({description: "Start typing to search for download..."});
+chrome.omnibox.setDefaultSuggestion({description: _default_descr});
 
 /* Listener for input change.
 */
@@ -23,14 +30,14 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 		for(var i = 0; i < results.length; i++) {
 			var downloadItem = results[i];
 			var filename = downloadItem.filename;
-			var fileExists = downloadItem.exists;
+			var fileExists = downloadItem.exists;	
 
 			// only if have filename & it exists in file system 
 			// do we consider as suggestion
 			if(filename && fileExists) {
 				filename = filename.split('/').pop();
 
-				suggestions.push({content: filename, description: match(filename)});
+				suggestions.push({content: filename, description: fmt.match(filename)});
 				downloads[filename] = downloadItem.id;
 			}
 		}
