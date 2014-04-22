@@ -1,11 +1,11 @@
 {
   "manifest_version": 2,
 
-  "name": "Download search",
+  "name": "Search Downloads",
   "version": "1.0",
   "omnibox": { "keyword" : "ds" },
   "icons": {
-    /*"16": "16-full-color.png"*/
+    "128": "icon128.png"
   },
   "background": {
     "persistent": false,
