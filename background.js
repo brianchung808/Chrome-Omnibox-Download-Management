@@ -1,6 +1,11 @@
 // holds key:value pair of filename:download_id
 var downloads = [];
 var _default_descr = "Search for downloaded items. Type '--help' for available commands";
+var help = [
+	{content: "[filename]", description: "[filename]: Open folder containing specified file."},
+	{content: "[filename] -d", description: "[filename] -d: Delete specified file."},
+	{content: "[filename] -o", description: "[filename] -o: Open specified file."}
+];
 
 // object for formatting description text
 var fmt = {
@@ -27,9 +32,7 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 	text = text.trim();
 
 	if(text == "--help") {
-		suggestions.push({content: " ", description: "[filename] -d: Delete specified file."});	
-
-		suggest(suggestions);
+		suggest(help);
 		return;
 	}
 
