@@ -1,7 +1,13 @@
+// holds key:value pair of filename:download_id
 var downloads = [];
 
+
+/* Listener for input change.
+*/
 chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 
+	/* When input changes, search downloads
+	 */
 	chrome.downloads.search({query: [text]}, function(results) {
 		suggestions = [];
 		for(var i = 0; i < results.length; i++) {
@@ -21,8 +27,10 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 	});
 });
 
-
-
+/* Listener for input being submitted.
+*/
 chrome.omnibox.onInputEntered.addListener(function(text) {
+	// when user enters input, open the file.
+	// TODO -> Add option for delete
 	chrome.downloads.open(downloads[text]);
 });
