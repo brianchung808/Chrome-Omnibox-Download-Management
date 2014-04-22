@@ -95,11 +95,22 @@ chrome.omnibox.onInputEntered.addListener(function(text) {
 	} else {
 		input = text;
 	}
+	// if options specified
+	if(options) {
 
-	if(options && options.indexOf("d") > -1) {
-		chrome.downloads.removeFile(downloads[input]);
+		// TODO -> more options, not mutually exclusive.
+		if(options.indexOf("d") > -1) {
+			chrome.downloads.removeFile(downloads[input]);
 
+		} else if(options.indexOf("o") > -1) {
+			chrome.downloads.open(downloads[input]);
+
+		} else {
+			// undefined option
+		}
+
+	// else, just show file in folder
 	} else {
-		chrome.downloads.open(downloads[input]);
+		chrome.downloads.show(downloads[input]);
 	}
 });
