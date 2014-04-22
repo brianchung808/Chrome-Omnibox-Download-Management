@@ -1,6 +1,6 @@
 // holds key:value pair of filename:download_id
 var downloads = [];
-var _default_descr = "Search for downloaded items";
+var _default_descr = "Search for downloaded items. Type '--help' for available commands";
 
 // object for formatting description text
 var fmt = {
@@ -22,11 +22,36 @@ chrome.omnibox.setDefaultSuggestion({description: _default_descr});
 /* Listener for input change.
 */
 chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
+	suggestions = [];
+
+	text = text.trim();
+
+	if(text == "--help") {
+		suggestions.push({content: " ", description: "[filename] -d: Delete specified file."});	
+
+		suggest(suggestions);
+		return;
+	}
+
+	var input;
+	var options;
+
+	var text_split = text.split(' ');
+
+	if(text_split.length == 2) {
+		input = text_split[0].trim();
+		options = text_split[1].trim();
+
+		console.log("file: " + input);
+		console.log("options: " + options);
+
+	} else {
+		input = text;
+	}
 
 	/* When input changes, search downloads
 	 */
-	chrome.downloads.search({query: [text]}, function(results) {
-		suggestions = [];
+	chrome.downloads.search({query: [input]}, function(results) {
 		for(var i = 0; i < results.length; i++) {
 			var downloadItem = results[i];
 			var filename = downloadItem.filename;
@@ -54,5 +79,24 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 chrome.omnibox.onInputEntered.addListener(function(text) {
 	// when user enters input, open the file.
 	// TODO -> Add option for delete
-	chrome.downloads.open(downloads[text]);
+
+	var text_split = text.split(' ');
+
+	var input;
+	var options;
+
+	if(text_split.length == 2) {
+		input = text_split[0].trim();
+		options = text_split[1].trim();
+
+	} else {
+		input = text;
+	}
+
+	if(options && options.indexOf("d") > -1) {
+		chrome.downloads.removeFile(downloads[input]);
+
+	} else {
+		chrome.downloads.open(downloads[input]);
+	}
 });
