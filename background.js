@@ -91,7 +91,7 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 
 	/* When input changes, search downloads
 	 */
-	chrome.downloads.search({query: [input]}, function(results) {
+	chrome.downloads.search({query: [input], orderBy: ['-startTime']}, function(results) {
 		for(var i = 0; i < results.length; i++) {
 			var downloadItem = results[i];
 			var filename = downloadItem.filename;
