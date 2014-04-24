@@ -29,11 +29,10 @@ var notif = {
 			iconUrl: "icon128.png",
 			title: "Deletion Successful",
 			message: filename + " successfully deleted.",
-			eventTime: Date.now(),
 			isClickable: false
 		};
 
-		chrome.notifications.create("Deletion", opt, function(notificationId){});
+		chrome.notifications.create("Deletion_" + notif.deleted_count++, opt, function(notificationId){});
 	},
 
 	opened: function(filename) {
@@ -42,12 +41,14 @@ var notif = {
 			iconUrl: "icon128.png",
 			title: "Opening File",
 			message: filename + " opening...",
-			eventTime: Date.now(),
 			isClickable: false
 		};
 
-		chrome.notifications.create("Open", opt, function(notificationId){});
-	}
+		chrome.notifications.create("Open_" + notif.opened_count++, opt, function(notificationId){});
+	},
+
+	deleted_count: 0,
+	opened_count:  0
 };
 
 /* Parse user input for filename & options
