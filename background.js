@@ -56,6 +56,16 @@ var notif = {
  * Return: {string filename, string options}
  */
 function parseOptions(text) {
+	/* TODO:
+	 * - Do better check than lastIndexOf('-') -> check if it's the last contin. sequence of char
+	 *   to match filename -[options]. There can be no spaces after -[options]
+	 * - Clean up logic. Rely more on finding '-[option]' rather than space-separated words
+	 *
+	 * - Return an error type if input not in accordance to 'filename -[options]' & show notification
+	 *   if user tries to enter input with incorrect format.
+	 */
+
+
 	var input, options;
 
 	var text_split = text.split(' ');
