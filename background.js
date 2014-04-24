@@ -20,7 +20,35 @@ var fmt = {
 	url: function (text) {
 		return "<url>" + text + "</url>";		
 	}
-}
+};
+
+var notif = {
+	deleted: function(filename) {
+		var opt = {
+			type: "basic",
+			iconUrl: "icon128.png",
+			title: "Deletion Successful",
+			message: filename + " successfully deleted.",
+			eventTime: Date.now(),
+			isClickable: false
+		};
+
+		chrome.notifications.create("Deletion", opt, function(notificationId){});
+	},
+
+	opened: function(filename) {
+		var opt = {
+			type: "basic",
+			iconUrl: "icon128.png",
+			title: "Opening File",
+			message: filename + " opening...",
+			eventTime: Date.now(),
+			isClickable: false
+		};
+
+		chrome.notifications.create("Open", opt, function(notificationId){});
+	}
+};
 
 /* Parse user input for filename & options
  * Return: {string filename, string options}
@@ -127,9 +155,11 @@ chrome.omnibox.onInputEntered.addListener(function(text) {
 		// TODO -> more options, not mutually exclusive.
 		if(options.indexOf("d") > -1) {
 			chrome.downloads.removeFile(downloads[input]);
+			notif.deleted(input);
 
 		} else if(options.indexOf("o") > -1) {
 			chrome.downloads.open(downloads[input]);
+			notif.opened(input);
 
 		} else {
 			// undefined option
