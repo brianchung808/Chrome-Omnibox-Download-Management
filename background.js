@@ -1,5 +1,5 @@
-// holds key:value pair of filename:download_id
-var downloads = [];
+var downloads = []; // holds key:value pair of filename:download_id
+var _logo = "icon128.png";
 var _default_descr = "Search for downloaded items. Type '--help' for available commands";
 var help = [
 	{content: "[filename]", description: "[filename]: Open folder containing specified file."},
@@ -22,11 +22,12 @@ var fmt = {
 	}
 };
 
+// notification creating functions
 var notif = {
 	deleted: function(filename) {
 		var opt = {
 			type: "basic",
-			iconUrl: "icon128.png",
+			iconUrl: _logo,
 			title: "Deletion Successful",
 			message: filename + " successfully deleted.",
 			isClickable: false
@@ -38,7 +39,7 @@ var notif = {
 	opened: function(filename) {
 		var opt = {
 			type: "basic",
-			iconUrl: "icon128.png",
+			iconUrl: _logo,
 			title: "Opening File",
 			message: filename + " opening...",
 			isClickable: false
@@ -55,6 +56,16 @@ var notif = {
  * Return: {string filename, string options}
  */
 function parseOptions(text) {
+	/* TODO:
+	 * - Do better check than lastIndexOf('-') -> check if it's the last contin. sequence of char
+	 *   to match filename -[options]. There can be no spaces after -[options]
+	 * - Clean up logic. Rely more on finding '-[option]' rather than space-separated words
+	 *
+	 * - Return an error type if input not in accordance to 'filename -[options]' & show notification
+	 *   if user tries to enter input with incorrect format.
+	 */
+
+
 	var input, options;
 
 	var text_split = text.split(' ');
@@ -64,8 +75,9 @@ function parseOptions(text) {
 		input = text_split[0].trim();
 		options = text_split[1].trim();
 
-		// if searching for file w/ spaces, fallback to no-option case
+		// check if options is in correct format "-[options]"
 		if(options.indexOf('-') != 0) {
+			// searching for file w/ spaces, fallback to no-option case
 			console.log("Searching for filename w/ spaces");
 			options = undefined;
 			input = text.trim();
@@ -73,11 +85,12 @@ function parseOptions(text) {
 
 	// Case: File w/ spaces & (maybe) -options 
 	} else if(text_split.length > 2) {
+		var options_index = text.lastIndexOf('-');
 
 		// check option case for files w/ spaces in name
-		if(text.lastIndexOf('-') != -1) {
-			input = text.substring(0, text.lastIndexOf('-')).trim();
-			options = text.substring(text.lastIndexOf('-'), text.length).trim();
+		if(options_index != -1) {
+			input = text.substring(0, options_index).trim();
+			options = text.substring(options_index, text.length).trim();
 
 		// else, no options & spaces-in-filename
 		} else {
