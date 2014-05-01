@@ -4,7 +4,8 @@ var _default_descr = "Search for downloaded items. Type '--help' for available c
 var help = [
 	{content: "[filename]", description: "[filename]: Open folder containing specified file."},
 	{content: "[filename] -d", description: "[filename] -d: Delete specified file."},
-	{content: "[filename] -o", description: "[filename] -o: Open specified file."}
+	{content: "[filename] -o", description: "[filename] -o: Open specified file."},
+	{content: "[filename] -t", description: "[filename] -t: Open specified file in new tab."}
 ];
 
 // object for formatting description text
@@ -48,8 +49,22 @@ var notif = {
 		chrome.notifications.create("Open_" + notif.opened_count++, opt, function(notificationId){});
 	},
 
+	createdTab: function(filename) {
+		var opt = {
+			type: "basic",
+			iconUrl: _logo,
+			title: "Opening New Tab",
+			message: filename + " opening...",
+			isClickable: false
+		};
+
+		chrome.notifications.create("Tab_" + notif.tab_count++, opt, function(notificationId){});
+
+	},
+
 	deleted_count: 0,
-	opened_count:  0
+	opened_count:  0,
+	tab_count: 0
 };
 
 /* Parse user input for filename & options
@@ -117,7 +132,7 @@ chrome.omnibox.setDefaultSuggestion({description: _default_descr});
 /* Listener for input change.
 */
 chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
-	suggestions = [];
+	var suggestions = [];
 
 	text = text.trim();
 
@@ -142,10 +157,11 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 			// only if have filename & it exists in file system 
 			// do we consider as suggestion
 			if(filename && fileExists) {
+				var full_path = filename;
 				filename = filename.split('/').pop();
 
 				suggestions.push({content: filename, description: fmt.match(filename)});
-				downloads[filename] = downloadItem.id;
+				downloads[filename] = { id: downloadItem.id, full_path: full_path};
 			}
 		}
 
@@ -168,12 +184,16 @@ chrome.omnibox.onInputEntered.addListener(function(text) {
 
 		// TODO -> more options, not mutually exclusive.
 		if(options.indexOf("d") > -1) {
-			chrome.downloads.removeFile(downloads[input]);
+			chrome.downloads.removeFile(downloads[input].id);
 			notif.deleted(input);
 
 		} else if(options.indexOf("o") > -1) {
-			chrome.downloads.open(downloads[input]);
+			chrome.downloads.open(downloads[input].id);
 			notif.opened(input);
+
+		} else if(options.indexOf("t") > -1) {
+			chrome.tabs.create({ url: 'file://' + downloads[input].full_path });
+			notif.createdTab(input);
 
 		} else {
 			// undefined option
@@ -181,6 +201,6 @@ chrome.omnibox.onInputEntered.addListener(function(text) {
 
 	// else, just show file in folder
 	} else {
-		chrome.downloads.show(downloads[input]);
+		chrome.downloads.show(downloads[input].id);
 	}
 });

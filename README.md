@@ -10,5 +10,6 @@ Manage your downloads through the Omnibox (search box).
 * [filename]: Open folder containing specified file.
 * [filename] -d: Delete specified file.
 * [filename] -o: Open specified file.
+* [filename] -t: Open specified file in a new tab.
 
 More options to be added.

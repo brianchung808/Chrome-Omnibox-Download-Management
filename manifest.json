@@ -15,6 +15,7 @@
   "permissions": [
       "downloads",
       "downloads.open",
-      "notifications"
+      "notifications",
+      "tabs"
   ]
 }
