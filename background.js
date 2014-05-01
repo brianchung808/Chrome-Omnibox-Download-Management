@@ -64,8 +64,8 @@ var fmt = {
 function clearNotification(notificationId) {
 	setTimeout(function(){
 		chrome.notifications.clear(notificationId, function(){});
-	}, 1500);
-}
+	}, 5000);
+};
 
 // notification creating functions
 var notif = {
