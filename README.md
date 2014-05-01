@@ -1,5 +1,5 @@
-Chrome-Downloads-Management-via-Omnibox
-=======================================
+Chrome-Omnibox-Download-Management
+================================== 
 
 Manage your downloads through the Omnibox (search box).
 
@@ -13,3 +13,5 @@ Manage your downloads through the Omnibox (search box).
 * [filename] -t: Open specified file in a new tab.
 
 More options to be added.
+
+[Chrome Web Store Link](https://chrome.google.com/webstore/detail/search-downloads/obefkpoacckligmdblalmddagdkcncbf)
