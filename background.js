@@ -7,10 +7,11 @@ var help = [
 	{content: "[filename] -o", description: "[filename] -o: Open specified file."},
 	{content: "[filename] -t", description: "[filename] -t: Open specified file in new tab."}
 ];
-var OPTIONS_CONSTANT = {
+var CONSTANTS = {
 	OPEN : 'o',
 	DELETE: 'd',
-	OPEN_TAB: 't'
+	OPEN_TAB: 't',
+	SPLIT_STR: ' -'
 };
 
 
@@ -88,12 +89,31 @@ function parseOptions(text) {
 
 	var input, options;
 
-	var text_split = text.split(' -');
+	var text_split = text.split(CONSTANTS.SPLIT_STR);
 
 	// Case: filename w/ no spaces followed by -options
 	if(text_split.length == 2) {
 		input = text_split[0].trim();
 		options = text_split[1].trim();
+
+	//Case: filename w/ spaces followed by -options
+	} else if(text_split.length > 2) {
+		input = text_split[0];
+
+		for(var i=1; i < text_split.length; i++) {
+			if(text_split[i].trim().length == 1) {
+				options = text_split[i].trim();
+				break;
+
+			} else {
+				input = input + CONSTANTS.SPLIT_STR + text_split[i];
+
+			}
+
+		}
+
+		input = input.trim();
+		console.log("THE INPUT: " + input);
 
 	// Case: no options, no-spaces-in-filename
 	} else {
@@ -166,15 +186,15 @@ chrome.omnibox.onInputEntered.addListener(function(text) {
 	if(options) {
 
 		// TODO -> more options, not mutually exclusive.
-		if(options == OPTIONS_CONSTANT.DELETE) {
+		if(options == CONSTANTS.DELETE) {
 			chrome.downloads.removeFile(downloads[input].id);
 			notif.deleted(input);
 
-		} else if(options == OPTIONS_CONSTANT.OPEN) {
+		} else if(options == CONSTANTS.OPEN) {
 			chrome.downloads.open(downloads[input].id);
 			notif.opened(input);
 
-		} else if(options = OPTIONS_CONSTANT.OPEN_TAB) {
+		} else if(options = CONSTANTS.OPEN_TAB) {
 			chrome.tabs.create({ url: 'file://' + downloads[input].full_path });
 			notif.createdTab(input);
 
