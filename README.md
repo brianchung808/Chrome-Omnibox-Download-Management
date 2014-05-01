@@ -1,5 +1,5 @@
- Chrome-Omnibox-Download-Management
- ==================================
+Chrome-Omnibox-Download-Management
+================================== 
 
 Manage your downloads through the Omnibox (search box).
 
