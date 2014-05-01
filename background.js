@@ -3,6 +3,10 @@
 ///////////////// Authors: Brian Chung, Ronald Castillo /////////////////
 /////////////////////////////////////////////////////////////////////////
 
+
+/////////////////////////////////////////////////////////////////////////
+//////////////// Helper Functions, Constants ////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 var downloads = []; // holds <key, value> pair of <filename, {download_id, full_path}>
 var _logo = "icon128.png";
 var _default_descr = "Search for downloaded items. Type '--help' for available commands.";
@@ -158,16 +162,11 @@ function parseOptions(text) {
 	} else if(text_split.length > 2) {
 		input = text_split[0];
 
-		for(var i=1; i < text_split.length; i++) {
-			if(text_split[i].trim().length == 1) {
-				options = text_split[i].trim();
-				break;
-
-			} else {
-				input = input + CONSTANTS.SPLIT_STR + text_split[i];
-
-			}
-
+		var potential_option = text_split[text_split.length-1].trim();
+		LOG("potential_option: " + potential_option);
+		// if potential_option is enum, then valid option
+		if(isActionEnum(potential_option)) {
+			options = text_split.pop();
 		}
 
 		input = text_split.join(SPLIT_STR).trim();
