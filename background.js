@@ -1,53 +1,20 @@
-/////////////////////////////////////////////////////////////////////////
-////////////////// Download Management Through Omnibox //////////////////
-///////////////// Authors: Brian Chung, Ronald Castillo /////////////////
-/////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////
-//////////////// Helper Functions, Constants ////////////////////////////
-/////////////////////////////////////////////////////////////////////////
-var downloads = []; // holds <key, value> pair of <filename, {download_id, full_path}>
+var downloads = []; // holds key:value pair of filename:download_id
 var _logo = "icon128.png";
-var _default_descr = "Search for downloaded items. Type '--help' for available commands.";
+var _default_descr = "Search for downloaded items. Type '--help' for available commands";
 var help = [
 	{content: "[filename]", description: "[filename]: Open folder containing specified file."},
 	{content: "[filename] -d", description: "[filename] -d: Delete specified file."},
 	{content: "[filename] -o", description: "[filename] -o: Open specified file."},
 	{content: "[filename] -t", description: "[filename] -t: Open specified file in new tab."}
 ];
-var ACTION_ENUM = {
+var CONSTANTS = {
 	OPEN : 'o',
 	DELETE: 'd',
 	OPEN_TAB: 't',
-<<<<<<< HEAD
 	SPLIT_STR: ' -',
 	FILE_PROTOCOL: 'file//'
-=======
->>>>>>> FETCH_HEAD
 };
 
-function isActionEnum(str) {
-	for(var key in ACTION_ENUM) {
-		var obj = ACTION_ENUM[key];
-		if(obj == str) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-var	SPLIT_STR = ' -';
-
-
-var LOGGING = true;
-
-function LOG(message) {
-	if(LOGGING) {
-		console.log(message);
-	}
-}
 
 // object for formatting description text
 var fmt = {
@@ -64,13 +31,6 @@ var fmt = {
 	}
 };
 
-// function to pass to notifications.
-function clearNotification(notificationId) {
-	setTimeout(function(){
-		chrome.notifications.clear(notificationId, function(){});
-	}, 1500);
-}
-
 // notification creating functions
 var notif = {
 	deleted: function(filename) {
@@ -82,7 +42,7 @@ var notif = {
 			isClickable: false
 		};
 
-		chrome.notifications.create("Deletion_" + notif.deleted_count++, opt, clearNotification);
+		chrome.notifications.create("Deletion_" + notif.deleted_count++, opt, function(notificationId){});
 	},
 
 	opened: function(filename) {
@@ -94,21 +54,7 @@ var notif = {
 			isClickable: false
 		};
 
-		chrome.notifications.create("Open_" + notif.opened_count++, opt, clearNotification);
-
-	},
-
-
-	openedFolder: function(filename) {
-		var opt = {
-			type: "basic",
-			iconUrl: _logo,
-			title: "Opening Folder",
-			message: "Opening folder containing " + filename,
-			isClickable: false
-		};
-
-		chrome.notifications.create("OpenFolder_" + notif.opened_folder_count++, opt, clearNotification);
+		chrome.notifications.create("Open_" + notif.opened_count++, opt, function(notificationId){});
 	},
 
 	createdTab: function(filename) {
@@ -120,47 +66,13 @@ var notif = {
 			isClickable: false
 		};
 
-		chrome.notifications.create("Tab_" + notif.tab_count++, opt, clearNotification);
+		chrome.notifications.create("Tab_" + notif.tab_count++, opt, function(notificationId){});
 
 	},
 
-	invalidOption: function(option) {
-		var opt = {
-			type: "basic",
-			iconUrl: _logo,
-			title: "Error",
-			message: 
-			"Unrecognized option '-" + option + "'.\n\n" + 
-			"-d: Delete specified file.\n" +
-			"-o: Open specified file.\n" +
-			"-t: Open specified file in new tab.",
-			isClickable: false
-		};
-
-		chrome.notifications.create("invalidOption_" + notif.option_error_count++, opt, clearNotification);
-
-	},
-
-	unknownFile: function(filename) {
-		var opt = {
-			type: "basic",
-			iconUrl: _logo,
-			title: "Error",
-			message: "Cannot find file " + filename, 
-			isClickable: false
-		};
-
-		chrome.notifications.create("unknownFile_" + notif.file_error_count++, opt, clearNotification);
-
-	},
-
-	// counts for notification IDs
 	deleted_count: 0,
 	opened_count:  0,
-	opened_folder_count:0,
-	tab_count: 0,
-	option_error_count: 0,
-	file_error_count: 0
+	tab_count: 0
 };
 
 /* Parse user input for filename & options
@@ -178,7 +90,7 @@ function parseOptions(text) {
 
 	var input, options;
 
-	var text_split = text.split(SPLIT_STR);
+	var text_split = text.split(CONSTANTS.SPLIT_STR);
 
 	// Case: filename w/ no spaces followed by -options
 	if(text_split.length == 2) {
@@ -189,16 +101,20 @@ function parseOptions(text) {
 	} else if(text_split.length > 2) {
 		input = text_split[0];
 
-		var potential_option = text_split[text_split.length-1].trim();
-		LOG("potential_option: " + potential_option);
-		// if potential_option is enum, then valid option
-		if(isActionEnum(potential_option)) {
-			options = text_split.pop();
+		for(var i=1; i < text_split.length; i++) {
+			if(text_split[i].trim().length == 1) {
+				options = text_split[i].trim();
+				break;
+
+			} else {
+				input = input + CONSTANTS.SPLIT_STR + text_split[i];
+
+			}
+
 		}
 
-		input = text_split.join(SPLIT_STR).trim();
-
-		LOG("THE INPUT: " + input);
+		input = input.trim();
+		console.log("THE INPUT: " + input);
 
 	// Case: no options, no-spaces-in-filename
 	} else {
@@ -206,8 +122,8 @@ function parseOptions(text) {
 	}
 
 
-	LOG("file: " + input);
-	LOG("options: " + options);
+	console.log("file: " + input);
+	console.log("options: " + options);
 
 	return {
 		input: input,
@@ -215,56 +131,13 @@ function parseOptions(text) {
 	}
 }
 
-/* Complete the user action on the specified file
- */
-function doAction(filename, action) {
-
-	// file doesn't exist, tell user
-	if(! downloads[filename] ) {
-		notif.unknownFile(filename);
-		return;
-	}
-
-	// match action to an action enum
-	switch(action) {
-		case ACTION_ENUM.DELETE:
-			chrome.downloads.removeFile(downloads[filename].id);
-			notif.deleted(filename);
-			break;
-
-		case ACTION_ENUM.OPEN:
-			chrome.downloads.open(downloads[filename].id);
-			notif.opened(filename);
-			break;
-
-		case ACTION_ENUM.OPEN_TAB:
-			chrome.tabs.create({ url: 'file://' + downloads[filename].full_path });
-			notif.createdTab(filename);
-			break;
-
-		case undefined:
-			// opening folder passes undefined for action
-			chrome.downloads.show(downloads[filename].id);
-			notif.openedFolder(filename);
-			break;
-
-		default:
-			// unsupported option
-			notif.invalidOption(action);
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////
-///////////////////// Chrome Listeners //////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
-
-// set the default suggestion 
 chrome.omnibox.setDefaultSuggestion({description: _default_descr});
 
 /* Listener for input change.
 */
 chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 	var suggestions = [];
+
 	text = text.trim();
 
 	if(text == "--help") {
@@ -292,10 +165,7 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 				filename = filename.split('/').pop();
 
 				suggestions.push({content: filename, description: fmt.match(filename)});
-				downloads[filename] = { 
-					id: downloadItem.id, 
-					full_path: full_path
-				};
+				downloads[filename] = { id: downloadItem.id, full_path: full_path};
 			}
 		}
 
@@ -305,12 +175,11 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 	});
 });
 
-/* Listener for input being entered.
+/* Listener for input being submitted.
 */
 chrome.omnibox.onInputEntered.addListener(function(text) {
 	var parse = parseOptions(text);
 
-<<<<<<< HEAD
 	var input = parse.input;
 	var options = parse.options;
 
@@ -329,11 +198,13 @@ chrome.omnibox.onInputEntered.addListener(function(text) {
 		} else if(options = CONSTANTS.OPEN_TAB) {
 			chrome.tabs.create({ url: CONSTANTS.FILE_PROTOCOL + downloads[input].full_path });
 			notif.createdTab(input);
-=======
-	var filename = parse.input;
-	var action = parse.options;
->>>>>>> FETCH_HEAD
 
-	// complete user action on filename
-	doAction(filename, action);
+		} else {
+			// undefined option
+		}
+
+	// else, just show file in folder
+	} else {
+		chrome.downloads.show(downloads[input].id);
+	}
 });
