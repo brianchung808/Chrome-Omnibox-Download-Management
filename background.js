@@ -1,6 +1,11 @@
-var downloads = []; // holds key:value pair of filename:download_id
+/////////////////////////////////////////////////////////////////////////
+////////////////// Download Management Through Omnibox //////////////////
+///////////////// Authors: Brian Chung, Ronald Castillo /////////////////
+/////////////////////////////////////////////////////////////////////////
+
+var downloads = []; // holds <key, value> pair of <filename, {download_id, full_path}>
 var _logo = "icon128.png";
-var _default_descr = "Search for downloaded items. Type '--help' for available commands";
+var _default_descr = "Search for downloaded items. Type '--help' for available commands.";
 var help = [
 	{content: "[filename]", description: "[filename]: Open folder containing specified file."},
 	{content: "[filename] -d", description: "[filename] -d: Delete specified file."},
@@ -67,6 +72,19 @@ var notif = {
 		chrome.notifications.create("Open_" + notif.opened_count++, opt, function(notificationId){});
 	},
 
+
+	openedFolder: function(filename) {
+		var opt = {
+			type: "basic",
+			iconUrl: _logo,
+			title: "Opening Folder",
+			message: "Opening folder containing " + filename,
+			isClickable: false
+		};
+
+		chrome.notifications.create("OpenFolder_" + notif.opened_folder_count++, opt, function(notificationId){});
+	},
+
 	createdTab: function(filename) {
 		var opt = {
 			type: "basic",
@@ -80,9 +98,29 @@ var notif = {
 
 	},
 
+	error: function(option) {
+		var opt = {
+			type: "basic",
+			iconUrl: _logo,
+			title: "Error",
+			message: 
+			"Unrecognized option '-" + option + "'.\n\n" + 
+			"-d: Delete specified file.\n" +
+			"-o: Open specified file.\n" +
+			"-t: Open specified file in new tab.",
+			isClickable: false
+		};
+
+		chrome.notifications.create("Error" + notif.error_count++, opt, function(notificationId){});
+
+	},
+
+	// counts for notification IDs
 	deleted_count: 0,
 	opened_count:  0,
-	tab_count: 0
+	opened_folder_count:0,
+	tab_count: 0,
+	error_count: 0
 };
 
 /* Parse user input for filename & options
@@ -124,7 +162,7 @@ function parseOptions(text) {
 		}
 
 		input = input.trim();
-		console.log("THE INPUT: " + input);
+		LOG("THE INPUT: " + input);
 
 	// Case: no options, no-spaces-in-filename
 	} else {
@@ -132,8 +170,8 @@ function parseOptions(text) {
 	}
 
 
-	console.log("file: " + input);
-	console.log("options: " + options);
+	LOG("file: " + input);
+	LOG("options: " + options);
 
 	return {
 		input: input,
