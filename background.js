@@ -141,13 +141,49 @@ function parseOptions(text) {
 	}
 }
 
+/* Complete the user action on the specified file
+ */
+function doAction(filename, action) {
+	// match action to an action enum
+	switch(action) {
+		case CONSTANTS.DELETE:
+			chrome.downloads.removeFile(downloads[filename].id);
+			notif.deleted(filename);
+			break;
+
+		case CONSTANTS.OPEN:
+			chrome.downloads.open(downloads[filename].id);
+			notif.opened(filename);
+			break;
+
+		case CONSTANTS.OPEN_TAB:
+			chrome.tabs.create({ url: 'file://' + downloads[filename].full_path });
+			notif.createdTab(filename);
+			break;
+
+		case undefined:
+			// opening folder passes undefined for action
+			chrome.downloads.show(downloads[filename].id);
+			notif.openedFolder(filename);
+			break;
+
+		default:
+			// unsupported option
+			notif.error(action);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////
+///////////////////// Chrome Listeners //////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+// set the default suggestion 
 chrome.omnibox.setDefaultSuggestion({description: _default_descr});
 
 /* Listener for input change.
 */
 chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 	var suggestions = [];
-
 	text = text.trim();
 
 	if(text == "--help") {
@@ -175,7 +211,10 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 				filename = filename.split('/').pop();
 
 				suggestions.push({content: filename, description: fmt.match(filename)});
-				downloads[filename] = { id: downloadItem.id, full_path: full_path};
+				downloads[filename] = { 
+					id: downloadItem.id, 
+					full_path: full_path
+				};
 			}
 		}
 
@@ -185,36 +224,14 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
 	});
 });
 
-/* Listener for input being submitted.
+/* Listener for input being entered.
 */
 chrome.omnibox.onInputEntered.addListener(function(text) {
 	var parse = parseOptions(text);
 
-	var input = parse.input;
-	var options = parse.options;
+	var filename = parse.input;
+	var action = parse.options;
 
-	// if options specified
-	if(options) {
-
-		// TODO -> more options, not mutually exclusive.
-		if(options == CONSTANTS.DELETE) {
-			chrome.downloads.removeFile(downloads[input].id);
-			notif.deleted(input);
-
-		} else if(options == CONSTANTS.OPEN) {
-			chrome.downloads.open(downloads[input].id);
-			notif.opened(input);
-
-		} else if(options = CONSTANTS.OPEN_TAB) {
-			chrome.tabs.create({ url: 'file://' + downloads[input].full_path });
-			notif.createdTab(input);
-
-		} else {
-			// undefined option
-		}
-
-	// else, just show file in folder
-	} else {
-		chrome.downloads.show(downloads[input].id);
-	}
+	// complete user action on filename
+	doAction(filename, action);
 });
