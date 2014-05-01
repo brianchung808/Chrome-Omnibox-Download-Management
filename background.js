@@ -59,6 +59,13 @@ var fmt = {
 	}
 };
 
+// function to pass to notifications.
+function clearNotification(notificationId) {
+	setTimeout(function(){
+		chrome.notifications.clear(notificationId, function(){});
+	}, 1500);
+}
+
 // notification creating functions
 var notif = {
 	deleted: function(filename) {
@@ -70,7 +77,7 @@ var notif = {
 			isClickable: false
 		};
 
-		chrome.notifications.create("Deletion_" + notif.deleted_count++, opt, function(notificationId){});
+		chrome.notifications.create("Deletion_" + notif.deleted_count++, opt, clearNotification);
 	},
 
 	opened: function(filename) {
@@ -82,7 +89,8 @@ var notif = {
 			isClickable: false
 		};
 
-		chrome.notifications.create("Open_" + notif.opened_count++, opt, function(notificationId){});
+		chrome.notifications.create("Open_" + notif.opened_count++, opt, clearNotification);
+
 	},
 
 
@@ -95,7 +103,7 @@ var notif = {
 			isClickable: false
 		};
 
-		chrome.notifications.create("OpenFolder_" + notif.opened_folder_count++, opt, function(notificationId){});
+		chrome.notifications.create("OpenFolder_" + notif.opened_folder_count++, opt, clearNotification);
 	},
 
 	createdTab: function(filename) {
@@ -107,7 +115,7 @@ var notif = {
 			isClickable: false
 		};
 
-		chrome.notifications.create("Tab_" + notif.tab_count++, opt, function(notificationId){});
+		chrome.notifications.create("Tab_" + notif.tab_count++, opt, clearNotification);
 
 	},
 
@@ -124,7 +132,7 @@ var notif = {
 			isClickable: false
 		};
 
-		chrome.notifications.create("invalidOption_" + notif.option_error_count++, opt, function(notificationId){});
+		chrome.notifications.create("invalidOption_" + notif.option_error_count++, opt, clearNotification);
 
 	},
 
@@ -137,7 +145,7 @@ var notif = {
 			isClickable: false
 		};
 
-		chrome.notifications.create("unknownFile_" + notif.file_error_count++, opt, function(notificationId){});
+		chrome.notifications.create("unknownFile_" + notif.file_error_count++, opt, clearNotification);
 
 	},
 
