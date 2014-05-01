@@ -37,7 +37,7 @@ function isActionEnum(str) {
 	return false;
 }
 
-var LOGGING = true;
+var LOGGING = false;
 
 function LOG(message) {
 	if(LOGGING) {
@@ -79,45 +79,6 @@ var notif = {
 		};
 
 		chrome.notifications.create("Deletion_" + notif.deleted_count++, opt, clearNotification);
-	},
-
-	opened: function(filename) {
-		var opt = {
-			type: "basic",
-			iconUrl: _logo,
-			title: "Opening File",
-			message: filename + " opening...",
-			isClickable: false
-		};
-
-		chrome.notifications.create("Open_" + notif.opened_count++, opt, clearNotification);
-
-	},
-
-
-	openedFolder: function(filename) {
-		var opt = {
-			type: "basic",
-			iconUrl: _logo,
-			title: "Opening Folder",
-			message: "Opening folder containing " + filename,
-			isClickable: false
-		};
-
-		chrome.notifications.create("OpenFolder_" + notif.opened_folder_count++, opt, clearNotification);
-	},
-
-	createdTab: function(filename) {
-		var opt = {
-			type: "basic",
-			iconUrl: _logo,
-			title: "Opening New Tab",
-			message: filename + " opening...",
-			isClickable: false
-		};
-
-		chrome.notifications.create("Tab_" + notif.tab_count++, opt, clearNotification);
-
 	},
 
 	invalidOption: function(option) {
@@ -163,15 +124,6 @@ var notif = {
  * Return: {string filename, string options}
  */
 function parseOptions(text) {
-	/* TODO:
-	 * - Do better check than lastIndexOf('-') -> check if it's the last contin. sequence of char
-	 *   to match filename -[options]. There can be no spaces after -[options]
-	 * - Clean up logic. Rely more on finding '-[option]' rather than space-separated words
-	 *
-	 * - Return an error type if input not in accordance to 'filename -[options]' & show notification
-	 *   if user tries to enter input with incorrect format.
-	 */
-
 	var input, options;
 
 	var text_split = text.split(CONSTANTS.SPLIT_STR);
@@ -230,18 +182,15 @@ function doAction(filename, action) {
 
 		case ACTION_ENUM.OPEN:
 			chrome.downloads.open(downloads[filename].id);
-			notif.opened(filename);
 			break;
 
 		case ACTION_ENUM.OPEN_TAB:
 			chrome.tabs.create({ url: CONSTANTS.FILE_PROTOCOL + downloads[filename].full_path });
-			notif.createdTab(filename);
 			break;
 
 		case undefined:
 			// opening folder passes undefined for action
 			chrome.downloads.show(downloads[filename].id);
-			notif.openedFolder(filename);
 			break;
 
 		default:
