@@ -135,13 +135,11 @@ function parseOptions(text) {
 
 	//Case: filename w/ spaces followed by -options
 	} else if(text_split.length > 2) {
-		input = text_split[0];
-
 		var potential_option = text_split[text_split.length-1].trim();
 		LOG("potential_option: " + potential_option);
 		// if potential_option is enum, then valid option
 		if(isActionEnum(potential_option)) {
-			options = text_split.pop();
+			options = text_split.pop().trim();
 		}
 
 		input = text_split.join(CONSTANTS.SPLIT_STR).trim();
