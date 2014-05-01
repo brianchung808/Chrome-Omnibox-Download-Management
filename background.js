@@ -12,18 +12,27 @@ var help = [
 	{content: "[filename] -o", description: "[filename] -o: Open specified file."},
 	{content: "[filename] -t", description: "[filename] -t: Open specified file in new tab."}
 ];
-var CONSTANTS = {
+var ACTION_ENUM = {
 	OPEN : 'o',
 	DELETE: 'd',
 	OPEN_TAB: 't',
-	SPLIT_STR: ' -'
 };
 
-var LOGGING = true;
+function isActionEnum(str) {
+	for(var key in ACTION_ENUM) {
+		var obj = ACTION_ENUM[key];
+		if(obj == str) {
+			return true;
+		}
+	}
 
-/////////////////////////////////////////////////////////////////////////
-//////////////// Helper Functions, Constants ////////////////////////////
-/////////////////////////////////////////////////////////////////////////
+	return false;
+}
+
+var	SPLIT_STR = ' -';
+
+
+var LOGGING = true;
 
 function LOG(message) {
 	if(LOGGING) {
@@ -138,7 +147,7 @@ function parseOptions(text) {
 
 	var input, options;
 
-	var text_split = text.split(CONSTANTS.SPLIT_STR);
+	var text_split = text.split(SPLIT_STR);
 
 	// Case: filename w/ no spaces followed by -options
 	if(text_split.length == 2) {
@@ -161,7 +170,8 @@ function parseOptions(text) {
 
 		}
 
-		input = input.trim();
+		input = text_split.join(SPLIT_STR).trim();
+
 		LOG("THE INPUT: " + input);
 
 	// Case: no options, no-spaces-in-filename
@@ -184,17 +194,17 @@ function parseOptions(text) {
 function doAction(filename, action) {
 	// match action to an action enum
 	switch(action) {
-		case CONSTANTS.DELETE:
+		case ACTION_ENUM.DELETE:
 			chrome.downloads.removeFile(downloads[filename].id);
 			notif.deleted(filename);
 			break;
 
-		case CONSTANTS.OPEN:
+		case ACTION_ENUM.OPEN:
 			chrome.downloads.open(downloads[filename].id);
 			notif.opened(filename);
 			break;
 
-		case CONSTANTS.OPEN_TAB:
+		case ACTION_ENUM.OPEN_TAB:
 			chrome.tabs.create({ url: 'file://' + downloads[filename].full_path });
 			notif.createdTab(filename);
 			break;
