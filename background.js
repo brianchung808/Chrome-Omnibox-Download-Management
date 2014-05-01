@@ -7,6 +7,12 @@ var help = [
 	{content: "[filename] -o", description: "[filename] -o: Open specified file."},
 	{content: "[filename] -t", description: "[filename] -t: Open specified file in new tab."}
 ];
+var OPTIONS_CONSTANT = {
+	OPEN : 'o',
+	DELETE: 'd',
+	OPEN_TAB: 't'
+};
+
 
 // object for formatting description text
 var fmt = {
@@ -80,37 +86,14 @@ function parseOptions(text) {
 	 *   if user tries to enter input with incorrect format.
 	 */
 
-
 	var input, options;
 
-	var text_split = text.split(' ');
+	var text_split = text.split(' -');
 
 	// Case: filename w/ no spaces followed by -options
 	if(text_split.length == 2) {
 		input = text_split[0].trim();
 		options = text_split[1].trim();
-
-		// check if options is in correct format "-[options]"
-		if(options.indexOf('-') != 0) {
-			// searching for file w/ spaces, fallback to no-option case
-			console.log("Searching for filename w/ spaces");
-			options = undefined;
-			input = text.trim();
-		}
-
-	// Case: File w/ spaces & (maybe) -options 
-	} else if(text_split.length > 2) {
-		var options_index = text.lastIndexOf('-');
-
-		// check option case for files w/ spaces in name
-		if(options_index != -1) {
-			input = text.substring(0, options_index).trim();
-			options = text.substring(options_index, text.length).trim();
-
-		// else, no options & spaces-in-filename
-		} else {
-			input = text.trim();
-		}
 
 	// Case: no options, no-spaces-in-filename
 	} else {
@@ -183,15 +166,15 @@ chrome.omnibox.onInputEntered.addListener(function(text) {
 	if(options) {
 
 		// TODO -> more options, not mutually exclusive.
-		if(options.indexOf("d") > -1) {
+		if(options == OPTIONS_CONSTANT.DELETE) {
 			chrome.downloads.removeFile(downloads[input].id);
 			notif.deleted(input);
 
-		} else if(options.indexOf("o") > -1) {
+		} else if(options == OPTIONS_CONSTANT.OPEN) {
 			chrome.downloads.open(downloads[input].id);
 			notif.opened(input);
 
-		} else if(options.indexOf("t") > -1) {
+		} else if(options = OPTIONS_CONSTANT.OPEN_TAB) {
 			chrome.tabs.create({ url: 'file://' + downloads[input].full_path });
 			notif.createdTab(input);
 
