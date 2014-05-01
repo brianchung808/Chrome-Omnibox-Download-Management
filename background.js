@@ -111,7 +111,7 @@ var notif = {
 
 	},
 
-	error: function(option) {
+	invalidOption: function(option) {
 		var opt = {
 			type: "basic",
 			iconUrl: _logo,
@@ -124,7 +124,20 @@ var notif = {
 			isClickable: false
 		};
 
-		chrome.notifications.create("Error" + notif.error_count++, opt, function(notificationId){});
+		chrome.notifications.create("invalidOption_" + notif.option_error_count++, opt, function(notificationId){});
+
+	},
+
+	unknownFile: function(filename) {
+		var opt = {
+			type: "basic",
+			iconUrl: _logo,
+			title: "Error",
+			message: "Cannot find file " + filename, 
+			isClickable: false
+		};
+
+		chrome.notifications.create("unknownFile_" + notif.file_error_count++, opt, function(notificationId){});
 
 	},
 
@@ -133,7 +146,8 @@ var notif = {
 	opened_count:  0,
 	opened_folder_count:0,
 	tab_count: 0,
-	error_count: 0
+	option_error_count: 0,
+	file_error_count: 0
 };
 
 /* Parse user input for filename & options
@@ -191,6 +205,13 @@ function parseOptions(text) {
 /* Complete the user action on the specified file
  */
 function doAction(filename, action) {
+
+	// file doesn't exist, tell user
+	if(! downloads[filename] ) {
+		notif.unknownFile(filename);
+		return;
+	}
+
 	// match action to an action enum
 	switch(action) {
 		case ACTION_ENUM.DELETE:
@@ -216,7 +237,7 @@ function doAction(filename, action) {
 
 		default:
 			// unsupported option
-			notif.error(action);
+			notif.invalidOption(action);
 	}
 }
 
