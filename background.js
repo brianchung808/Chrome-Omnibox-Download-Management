@@ -11,7 +11,8 @@ var CONSTANTS = {
 	OPEN : 'o',
 	DELETE: 'd',
 	OPEN_TAB: 't',
-	SPLIT_STR: ' -'
+	SPLIT_STR: ' -',
+	FILE_PROTOCOL: 'file//'
 };
 
 
@@ -195,7 +196,7 @@ chrome.omnibox.onInputEntered.addListener(function(text) {
 			notif.opened(input);
 
 		} else if(options = CONSTANTS.OPEN_TAB) {
-			chrome.tabs.create({ url: 'file://' + downloads[input].full_path });
+			chrome.tabs.create({ url: CONSTANTS.FILE_PROTOCOL + downloads[input].full_path });
 			notif.createdTab(input);
 
 		} else {
